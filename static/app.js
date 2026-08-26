@@ -1,6 +1,10 @@
 // Roam AI Agent - Frontend JavaScript App
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Dynamic API Base URL determination (handles Live Server port 5500/5501 or direct FastAPI/Cloud Run)
+  const isLiveServer = (window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:');
+  const API_BASE = isLiveServer ? 'http://localhost:8000' : '';
+
   // App State
   let currentItinerary = null;
   let activeDayIndex = 0;
@@ -450,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const res = await fetch('/api/preferences', {
+      const res = await fetch(`${API_BASE}/api/preferences`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userPreferences)
@@ -468,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // API Call: Load User Preferences
   async function loadUserPreferences() {
     try {
-      const res = await fetch('/api/preferences');
+      const res = await fetch(`${API_BASE}/api/preferences`);
       if (res.ok) {
         userPreferences = await res.json();
         if (userPreferences) {
@@ -531,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function generateItineraryFromPrompt(promptText) {
     showLoading('Roam AI is analyzing your prompt...', `Extracting destination, dates, budget & interests with Gemini`);
     try {
-      const res = await fetch('/api/itinerary/from-prompt', {
+      const res = await fetch(`${API_BASE}/api/itinerary/from-prompt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: promptText, preferences: userPreferences })
@@ -556,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function generateItinerary(requestData) {
     showLoading('Roam AI is crafting your trip...', `Grounded places & itinerary for ${requestData.destination}`);
     try {
-      const res = await fetch('/api/itinerary/generate', {
+      const res = await fetch(`${API_BASE}/api/itinerary/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)
@@ -590,7 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const res = await fetch('/api/itinerary/replan', {
+      const res = await fetch(`${API_BASE}/api/itinerary/replan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(replanPayload)
