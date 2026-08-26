@@ -47,6 +47,7 @@
   <main class="main-layout">
 
     <!-- Welcome / Empty State (Shown before a trip is generated) -->
+    <!-- Welcome / Empty State (Shown before a trip is generated) -->
     <section id="welcome-section" class="welcome-card">
       <div class="welcome-content">
         <div class="hero-badge">
@@ -54,8 +55,43 @@
         </div>
         <h1>Where will your next journey take you?</h1>
         <p class="welcome-subtitle">
-          Describe your dream trip in natural language or speak via voice! Roam extracts your destination, dates, budget, and interests automatically using Gemini.
+          Describe your dream trip in natural language or speak directly to your AI Avatar! Roam remembers your preferences and plans your journey automatically using Gemini.
         </p>
+
+        <!-- Embedded Interactive AI Avatar Showcase Banner -->
+        <div class="hero-avatar-card">
+          <div class="hero-avatar-left">
+            <div class="hero-avatar-portrait-wrap">
+              <div class="hero-avatar-ring"></div>
+              <div class="hero-avatar-face" id="hero-avatar-face">
+                <svg viewBox="0 0 100 100" class="svg-avatar-img">
+                  <circle cx="50" cy="50" r="46" fill="#0f172a" stroke="#38bdf8" stroke-width="3"/>
+                  <rect x="26" y="32" width="48" height="36" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                  <circle cx="40" cy="48" r="5" fill="#38bdf8"/>
+                  <circle cx="60" cy="48" r="5" fill="#38bdf8"/>
+                  <path d="M40 58 Q50 64 60 58" stroke="#38bdf8" stroke-width="3" fill="none" stroke-linecap="round"/>
+                  <circle cx="50" cy="18" r="4" fill="#ef4444"/>
+                  <line x1="50" y1="18" x2="50" y2="32" stroke="#ef4444" stroke-width="3"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="hero-avatar-right">
+            <div class="hero-avatar-title">
+              <span class="avatar-live-badge"><i class="fa-solid fa-circle"></i> Live Voice AI Avatar</span>
+              <h3>Meet Roam — Your AI Voice & Memory Companion</h3>
+            </div>
+            <p class="hero-avatar-text">
+              Speak out loud with your avatar companion to plan dream trips, adapt to rainy weather, and hear audio trip summaries!
+            </p>
+            <div class="hero-avatar-actions">
+              <button id="btn-hero-talk-avatar" class="btn btn-accent">
+                <i class="fa-solid fa-microphone"></i>
+                <span>Talk Live with AI Avatar</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- Natural Language Prompt / Quick Search Box -->
         <div class="quick-planner-box">

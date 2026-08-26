@@ -294,6 +294,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Talk Live with AI Avatar Button
+  const btnHeroTalkAvatar = document.getElementById('btn-hero-talk-avatar');
+  if (btnHeroTalkAvatar) {
+    btnHeroTalkAvatar.addEventListener('click', () => {
+      aiAvatarWidget.classList.remove('minimized');
+      startLiveVoiceSession();
+    });
+  }
+
   if (btnLiveVoiceChat) {
     btnLiveVoiceChat.addEventListener('click', () => {
       startLiveVoiceSession();

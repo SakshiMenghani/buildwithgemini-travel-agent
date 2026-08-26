@@ -1270,6 +1270,100 @@ body {
   outline: none;
 }
 
+/* Hero Embedded AI Avatar Showcase Card */
+.hero-avatar-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.95));
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), 0 0 15px rgba(56, 189, 248, 0.15);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  color: white;
+  text-align: left;
+}
+
+.hero-avatar-portrait-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-avatar-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid #38bdf8;
+  box-shadow: 0 0 15px #38bdf8;
+  animation: pulse-ring-speaking 1.5s infinite alternate;
+}
+
+.hero-avatar-face {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #0f172a;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.svg-avatar-img {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-avatar-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.avatar-live-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.hero-avatar-title h3 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: white;
+  margin: 0;
+}
+
+.hero-avatar-text {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.hero-avatar-actions {
+  margin-top: 0.5rem;
+}
+
 .hidden {
   display: none !important;
 }
@@ -1281,7 +1375,6 @@ body {
   .activity-img-col { width: 100%; height: 160px; }
   .activity-time-col { min-width: auto; flex-direction: row; }
   .avatar-picker-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-avatar-card { flex-direction: column; text-align: center; align-items: center; }
   .ai-avatar-widget { bottom: 12px; right: 12px; width: 260px; }
 }
-
-
