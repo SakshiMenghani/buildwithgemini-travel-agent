@@ -3,10 +3,28 @@
 > Built with **Google Gemini 2.5 Flash**, **Google ADK (Agent Development Kit)**, and **Google Search Grounding** for the *Build with Gemini* hackathon.
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_App-Google_Cloud_Run-4285F4?style=for-the-badge&logo=googlecloud)](https://roam-app-659236617792.us-central1.run.app/)
+[![Watch Demo Video](https://img.shields.io/badge/🎥_Demo_Video-Watch_Walkthrough-FF0000?style=for-the-badge&logo=youtube)](https://github.com/SakshiMenghani/buildwithgemini-travel-agent/blob/main/demo_walkthrough.mp4)
 
-🔗 **Live App URL:** [https://roam-app-659236617792.us-central1.run.app/](https://roam-app-659236617792.us-central1.run.app/)
+🔗 **Live App URL:** [https://roam-app-659236617792.us-central1.run.app/](https://roam-app-659236617792.us-central1.run.app/)  
+🎥 **Full Video Walkthrough:** [`demo_walkthrough.mp4`](https://github.com/SakshiMenghani/buildwithgemini-travel-agent/blob/main/demo_walkthrough.mp4)
 
-![Roam Banner](https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80)
+---
+
+## 🎥 Application Demo Video & AI Voiceover
+
+Watch the complete narrated video walkthrough demonstrating Roam's live AI Avatar, voice speech recognition, traveler memory profile, and dynamic itinerary re-planning:
+
+🎬 **[▶ Click here to view `demo_walkthrough.mp4` on GitHub](https://github.com/SakshiMenghani/buildwithgemini-travel-agent/blob/main/demo_walkthrough.mp4)**
+
+<div align="center">
+  <a href="https://github.com/SakshiMenghani/buildwithgemini-travel-agent/blob/main/demo_walkthrough.mp4">
+    <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80" width="800" alt="Roam AI Video Demo" style="border-radius: 12px; border: 2px solid #38bdf8;" />
+    <br/>
+    <strong>▶️ Click to Watch Video Walkthrough with Narrated Audio Explanation</strong>
+  </a>
+</div>
+
+---
 
 ## 📌 Overview
 
