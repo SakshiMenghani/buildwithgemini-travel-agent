@@ -1,9 +1,15 @@
 // Roam AI Agent - Frontend JavaScript App
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Dynamic API Base URL determination (handles Live Server port 5500/5501 or direct FastAPI/Cloud Run)
-  const isLiveServer = (window.location.port === '5500' || window.location.port === '5501' || window.location.protocol === 'file:');
-  const API_BASE = isLiveServer ? 'http://localhost:8000' : '';
+  // Dynamic API Base URL determination (handles direct Cloud Run, local port 8000, and VS Code Live Server)
+  const isLocalhost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  let API_BASE = '';
+  if (isLocalhost) {
+    API_BASE = (window.location.port === '8000') ? '' : 'http://127.0.0.1:8000';
+  } else if (!window.location.hostname.includes('run.app')) {
+    // If opened via VS Code Live Server / proxy / file protocol on a remote VM
+    API_BASE = 'https://roam-app-659236617792.us-central1.run.app';
+  }
 
   // App State
   let currentItinerary = null;
@@ -539,15 +545,16 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to generate itinerary from prompt.');
+        const errorText = await res.text();
+        throw new Error(`Server returned ${res.status}: ${errorText}`);
       }
 
       currentItinerary = await res.json();
       activeDayIndex = 0;
       renderItineraryDashboard(currentItinerary);
     } catch (err) {
-      alert('Error generating itinerary from prompt. Please try again.');
-      console.error(err);
+      alert(`Error generating itinerary: ${err.message}`);
+      console.error('Itinerary generation error:', err);
     } finally {
       hideLoading();
     }
