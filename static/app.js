@@ -460,8 +460,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     avatarRecognition.onend = () => {
-      if (isAvatarSessionActive && document.getElementById('avatar-status-ring').classList.contains('listening')) {
-        setAvatarState('idle', "Ready for your next request!");
+      if (isAvatarSessionActive) {
+        setTimeout(() => {
+          if (isAvatarSessionActive && !('speechSynthesis' in window && window.speechSynthesis.speaking)) {
+            try {
+              setAvatarState('listening', "🎙️ Listening... Speak your destination or trip request now!");
+              avatarRecognition.start();
+            } catch (e) {
+              console.warn("Auto-restart recognition error:", e);
+            }
+          }
+        }, 300);
       }
     };
 
