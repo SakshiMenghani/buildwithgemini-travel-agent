@@ -2,6 +2,10 @@
 
 > Built with **Google Gemini 2.5 Flash**, **Google ADK (Agent Development Kit)**, and **Google Search Grounding** for the *Build with Gemini* hackathon.
 
+[![Live Demo](https://img.shields.io/badge/🚀_Live_App-Google_Cloud_Run-4285F4?style=for-the-badge&logo=googlecloud)](https://roam-app-659236617792.us-central1.run.app/)
+
+🔗 **Live App URL:** [https://roam-app-659236617792.us-central1.run.app/](https://roam-app-659236617792.us-central1.run.app/)
+
 ![Roam Banner](https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80)
 
 ## 📌 Overview
