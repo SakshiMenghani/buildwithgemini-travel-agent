@@ -128,9 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
     await generateItinerary(requestData);
   });
 
-  // Preferences Form Submit
-  preferencesForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
   // User Profile Badge Click
   const userProfileBadge = document.getElementById('user-profile-badge');
   if (userProfileBadge) {
