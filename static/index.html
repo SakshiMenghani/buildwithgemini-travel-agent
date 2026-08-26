@@ -334,6 +334,58 @@
     </div>
   </div>
 
+  <!-- Floating Live Interactive AI Avatar Companion Widget -->
+  <div id="ai-avatar-widget" class="ai-avatar-widget">
+    <div class="avatar-header">
+      <div class="avatar-title-row">
+        <span class="avatar-dot-pulse" id="avatar-dot-pulse"></span>
+        <span class="avatar-name">Roam AI Live Companion</span>
+      </div>
+      <button id="btn-minimize-avatar" class="btn-icon-sm" title="Minimize/Expand Avatar"><i class="fa-solid fa-chevron-down"></i></button>
+    </div>
+
+    <div class="avatar-body" id="avatar-body-content">
+      <!-- Speech Bubble -->
+      <div id="avatar-speech-bubble" class="avatar-speech-bubble">
+        <span id="avatar-speech-text">"Hi Sakshi! I'm Roam, your personal live AI travel avatar. Speak or type to plan your dream journey!"</span>
+      </div>
+
+      <!-- Animated Visual Avatar Face -->
+      <div class="avatar-visual-wrapper">
+        <div id="avatar-status-ring" class="avatar-status-ring idle"></div>
+        <div class="avatar-portrait">
+          <img id="ai-avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=RoamAI" alt="AI Agent Avatar" />
+        </div>
+
+        <!-- Equalizer Audio Wave animation when speaking -->
+        <div id="avatar-audio-equalizer" class="avatar-equalizer hidden">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <!-- Live Voice Control Buttons -->
+      <div class="avatar-actions">
+        <button id="btn-live-voice-chat" class="btn btn-accent btn-sm btn-full">
+          <i class="fa-solid fa-microphone"></i>
+          <span>Talk Live with AI Avatar</span>
+        </button>
+        <button id="btn-stop-avatar-voice" class="btn btn-danger btn-sm btn-full hidden">
+          <i class="fa-solid fa-square"></i>
+          <span>Stop Listening / Speaking</span>
+        </button>
+      </div>
+
+      <div class="avatar-selector-mini">
+        <span class="mini-label">AI Voice Persona:</span>
+        <select id="select-ai-persona" class="mini-select">
+          <option value="bot_1" selected>Roam AI (Bot)</option>
+          <option value="female_2">Aria (Concierge)</option>
+          <option value="male_1">Atlas (Guide)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
   <!-- Loading Screen Overlay -->
   <div id="loading-overlay" class="loading-overlay hidden">
     <div class="loading-spinner-box">

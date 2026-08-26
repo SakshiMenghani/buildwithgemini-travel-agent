@@ -208,6 +208,177 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // AI Avatar Companion Widget Interaction Logic
+  const aiAvatarWidget = document.getElementById('ai-avatar-widget');
+  const btnMinimizeAvatar = document.getElementById('btn-minimize-avatar');
+  const btnLiveVoiceChat = document.getElementById('btn-live-voice-chat');
+  const btnStopAvatarVoice = document.getElementById('btn-stop-avatar-voice');
+  const selectAiPersona = document.getElementById('select-ai-persona');
+  const aiAvatarImg = document.getElementById('ai-avatar-img');
+
+  let isAvatarSessionActive = false;
+  let avatarRecognition = null;
+
+  // Minimize / Expand Avatar Widget
+  if (btnMinimizeAvatar) {
+    btnMinimizeAvatar.addEventListener('click', () => {
+      aiAvatarWidget.classList.toggle('minimized');
+      const icon = btnMinimizeAvatar.querySelector('i');
+      if (aiAvatarWidget.classList.contains('minimized')) {
+        icon.className = 'fa-solid fa-chevron-up';
+      } else {
+        icon.className = 'fa-solid fa-chevron-down';
+      }
+    });
+  }
+
+  // Persona Selector
+  if (selectAiPersona) {
+    selectAiPersona.addEventListener('change', (e) => {
+      const p = e.target.value;
+      const avatarMap = {
+        'bot_1': 'https://api.dicebear.com/7.x/bottts/svg?seed=RoamAI',
+        'female_2': 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aria&gender=female',
+        'male_1': 'https://api.dicebear.com/7.x/avataaars/svg?seed=Atlas&gender=male'
+      };
+      aiAvatarImg.src = avatarMap[p] || avatarMap['bot_1'];
+    });
+  }
+
+  function setAvatarState(state, text = '') {
+    const ring = document.getElementById('avatar-status-ring');
+    const eq = document.getElementById('avatar-audio-equalizer');
+    const speechText = document.getElementById('avatar-speech-text');
+
+    if (text && speechText) {
+      speechText.textContent = `"${text}"`;
+    }
+
+    if (ring) {
+      ring.className = `avatar-status-ring ${state}`;
+    }
+
+    if (eq) {
+      if (state === 'speaking') {
+        eq.classList.remove('hidden');
+      } else {
+        eq.classList.add('hidden');
+      }
+    }
+  }
+
+  function speakAvatarResponse(text, onEndCallback = null) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+
+    setAvatarState('speaking', text);
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.05;
+
+    utterance.onstart = () => {
+      setAvatarState('speaking', text);
+    };
+
+    utterance.onend = () => {
+      setAvatarState('idle', "Ready for your next request!");
+      if (onEndCallback) onEndCallback();
+    };
+
+    utterance.onerror = () => {
+      setAvatarState('idle');
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Talk Live with AI Avatar Button
+  if (btnLiveVoiceChat) {
+    btnLiveVoiceChat.addEventListener('click', () => {
+      startLiveVoiceSession();
+    });
+  }
+
+  if (btnStopAvatarVoice) {
+    btnStopAvatarVoice.addEventListener('click', () => {
+      stopLiveVoiceSession();
+    });
+  }
+
+  function startLiveVoiceSession() {
+    isAvatarSessionActive = true;
+    btnLiveVoiceChat.classList.add('hidden');
+    btnStopAvatarVoice.classList.remove('hidden');
+
+    const userName = (userPreferences && userPreferences.user_name) ? userPreferences.user_name : 'Sakshi';
+    const introText = `Hi ${userName}! I am Roam, your live AI travel agent. Where would you like to travel next?`;
+
+    speakAvatarResponse(introText, () => {
+      if (isAvatarSessionActive) {
+        listenToUserVoice();
+      }
+    });
+  }
+
+  function stopLiveVoiceSession() {
+    isAvatarSessionActive = false;
+    btnLiveVoiceChat.classList.remove('hidden');
+    btnStopAvatarVoice.classList.add('hidden');
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    if (avatarRecognition) {
+      try { avatarRecognition.stop(); } catch (e) {}
+    }
+    setAvatarState('idle', "Voice session ended. Speak or click to start again!");
+  }
+
+  function listenToUserVoice() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser.");
+      stopLiveVoiceSession();
+      return;
+    }
+
+    setAvatarState('listening', "Listening to you... Speak now!");
+
+    avatarRecognition = new SpeechRecognition();
+    avatarRecognition.continuous = false;
+    avatarRecognition.interimResults = false;
+    avatarRecognition.lang = 'en-US';
+
+    avatarRecognition.onresult = async (event) => {
+      const userSpokenPrompt = event.results[0][0].transcript;
+      setAvatarState('thinking', `Processing: "${userSpokenPrompt}"...`);
+
+      if (currentItinerary && (userSpokenPrompt.includes('replan') || userSpokenPrompt.includes('change') || userSpokenPrompt.includes('rain') || userSpokenPrompt.includes('replace') || userSpokenPrompt.includes('day'))) {
+        await triggerReplan(userSpokenPrompt);
+        speakAvatarResponse(`I have updated your itinerary based on: ${userSpokenPrompt}. Take a look!`);
+      } else {
+        await generateItineraryFromPrompt(userSpokenPrompt);
+        if (currentItinerary) {
+          speakAvatarResponse(`I have crafted your trip to ${currentItinerary.destination}! ${currentItinerary.summary}`);
+        }
+      }
+    };
+
+    avatarRecognition.onerror = (err) => {
+      console.warn("Avatar speech recognition error:", err);
+      setAvatarState('idle', "Sorry, I didn't catch that. Click Talk Live to try again!");
+    };
+
+    avatarRecognition.onend = () => {
+      if (isAvatarSessionActive && document.getElementById('avatar-status-ring').classList.contains('listening')) {
+        setAvatarState('idle', "Ready!");
+      }
+    };
+
+    avatarRecognition.start();
+  }
+
   // Voice Agent: Text-to-Speech (Audio Narration)
   const btnVoiceSpeak = document.getElementById('btn-voice-speak');
   let isSpeaking = false;
@@ -230,6 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btnVoiceSpeak.innerHTML = `<i class="fa-solid fa-volume-high"></i> <span>Listen to Itinerary</span>`;
       btnVoiceSpeak.classList.remove('btn-danger');
       btnVoiceSpeak.classList.add('btn-accent');
+      setAvatarState('idle', "Ready!");
       return;
     }
 
@@ -244,30 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-
-    utterance.onstart = () => {
-      isSpeaking = true;
-      btnVoiceSpeak.innerHTML = `<i class="fa-solid fa-square"></i> <span>Stop Listening</span>`;
-      btnVoiceSpeak.classList.remove('btn-accent');
-      btnVoiceSpeak.classList.add('btn-danger');
-    };
-
-    utterance.onend = () => {
-      isSpeaking = false;
-      btnVoiceSpeak.innerHTML = `<i class="fa-solid fa-volume-high"></i> <span>Listen to Itinerary</span>`;
-      btnVoiceSpeak.classList.remove('btn-danger');
-      btnVoiceSpeak.classList.add('btn-accent');
-    };
-
-    utterance.onerror = () => {
-      isSpeaking = false;
-      btnVoiceSpeak.innerHTML = `<i class="fa-solid fa-volume-high"></i> <span>Listen to Itinerary</span>`;
-    };
-
-    window.speechSynthesis.speak(utterance);
+    speakAvatarResponse(textToSpeak);
   }
 
   // API Call: Save Preferences
