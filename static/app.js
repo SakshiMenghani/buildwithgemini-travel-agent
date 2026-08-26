@@ -274,8 +274,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  window.activeUtterance = null;
+
   function speakAvatarResponse(text, onEndCallback = null) {
-    if (!('speechSynthesis' in window)) return;
+    if (!('speechSynthesis' in window)) {
+      if (onEndCallback) onEndCallback();
+      return;
+    }
     window.speechSynthesis.cancel();
 
     setAvatarState('speaking', text);
@@ -284,18 +289,37 @@ document.addEventListener('DOMContentLoaded', () => {
     utterance.rate = 1.0;
     utterance.pitch = 1.05;
 
+    // Retain global reference to prevent Chrome garbage collection of utterance events
+    window.activeUtterance = utterance;
+
+    let callbackFired = false;
+    const triggerEnd = () => {
+      if (callbackFired) return;
+      callbackFired = true;
+      setAvatarState('idle', "Ready for your next request!");
+      if (onEndCallback) onEndCallback();
+    };
+
     utterance.onstart = () => {
       setAvatarState('speaking', text);
     };
 
     utterance.onend = () => {
-      setAvatarState('idle', "Ready for your next request!");
-      if (onEndCallback) onEndCallback();
+      triggerEnd();
     };
 
-    utterance.onerror = () => {
-      setAvatarState('idle');
+    utterance.onerror = (e) => {
+      console.warn("Speech synthesis error:", e);
+      triggerEnd();
     };
+
+    // Safety fallback timeout in case browser drops onend
+    const estimatedMs = Math.max(2500, text.length * 75);
+    setTimeout(() => {
+      if (!callbackFired && isAvatarSessionActive) {
+        triggerEnd();
+      }
+    }, estimatedMs);
 
     window.speechSynthesis.speak(utterance);
   }
