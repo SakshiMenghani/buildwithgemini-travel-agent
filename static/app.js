@@ -127,19 +127,169 @@ document.addEventListener('DOMContentLoaded', () => {
   // Preferences Form Submit
   preferencesForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+  // User Profile Badge Click
+  const userProfileBadge = document.getElementById('user-profile-badge');
+  if (userProfileBadge) {
+    userProfileBadge.addEventListener('click', () => {
+      showModal(modalPreferences);
+    });
+  }
+
+  // Avatar Picker Selection
+  let selectedAvatar = 'female_1';
+  document.querySelectorAll('#avatar-picker .avatar-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('#avatar-picker .avatar-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      selectedAvatar = opt.getAttribute('data-avatar');
+    });
+  });
+
+  // Voice Agent: Speech Recognition (Speech-to-Text)
+  setupVoiceRecognition('mic-quick-prompt', 'quick-prompt');
+  setupVoiceRecognition('mic-replan-input', 'replan-input');
+
+  function setupVoiceRecognition(buttonId, targetInputId) {
+    const btn = document.getElementById(buttonId);
+    const targetInput = document.getElementById(targetInputId);
+    if (!btn || !targetInput) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      btn.title = "Speech Recognition not supported in this browser.";
+      btn.style.opacity = '0.5';
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    let isListening = false;
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!isListening) {
+        recognition.start();
+      } else {
+        recognition.stop();
+      }
+    });
+
+    recognition.onstart = () => {
+      isListening = true;
+      btn.classList.add('listening');
+      btn.title = "Listening... Speak your prompt now";
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      if (targetInput.value) {
+        targetInput.value += " " + transcript;
+      } else {
+        targetInput.value = transcript;
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.warn("Speech recognition error:", event.error);
+      stopListening();
+    };
+
+    recognition.onend = () => {
+      stopListening();
+    };
+
+    function stopListening() {
+      isListening = false;
+      btn.classList.remove('listening');
+      btn.title = "Click to speak using Voice";
+    }
+  }
+
+  // Voice Agent: Text-to-Speech (Audio Narration)
+  const btnVoiceSpeak = document.getElementById('btn-voice-speak');
+  let isSpeaking = false;
+
+  if (btnVoiceSpeak) {
+    btnVoiceSpeak.addEventListener('click', () => {
+      toggleVoiceNarration();
+    });
+  }
+
+  function toggleVoiceNarration() {
+    if (!('speechSynthesis' in window)) {
+      alert("Text-to-Speech narration is not supported in this browser.");
+      return;
+    }
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      btnVoiceSpeak.innerHTML = `<i class="fa-solid fa-volume-high"></i> <span>Listen to Itinerary</span>`;
+      btnVoiceSpeak.classList.remove('btn-danger');
+      btnVoiceSpeak.classList.add('btn-accent');
+      return;
+    }
+
+    if (!currentItinerary) return;
+
+    let textToSpeak = `Trip to ${currentItinerary.destination}. ${currentItinerary.summary}. `;
+    if (currentItinerary.days && currentItinerary.days.length > 0) {
+      const day1 = currentItinerary.days[0];
+      textToSpeak += `Day 1 theme: ${day1.theme}. `;
+      day1.activities.slice(0, 2).forEach(act => {
+        textToSpeak += `${act.time_slot}: ${act.title}. ${act.description}. `;
+      });
+    }
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    utterance.onstart = () => {
+      isSpeaking = true;
+      btnVoiceSpeak.innerHTML = `<i class="fa-solid fa-square"></i> <span>Stop Listening</span>`;
+      btnVoiceSpeak.classList.remove('btn-accent');
+      btnVoiceSpeak.classList.add('btn-danger');
+    };
+
+    utterance.onend = () => {
+      isSpeaking = false;
+      btnVoiceSpeak.innerHTML = `<i class="fa-solid fa-volume-high"></i> <span>Listen to Itinerary</span>`;
+      btnVoiceSpeak.classList.remove('btn-danger');
+      btnVoiceSpeak.classList.add('btn-accent');
+    };
+
+    utterance.onerror = () => {
+      isSpeaking = false;
+      btnVoiceSpeak.innerHTML = `<i class="fa-solid fa-volume-high"></i> <span>Listen to Itinerary</span>`;
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // API Call: Save Preferences
+  preferencesForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
     hideModal(modalPreferences);
 
     const dietaryStr = document.getElementById('pref-dietary').value;
     const dietaryList = dietaryStr ? dietaryStr.split(',').map(s => s.trim()) : [];
 
     userPreferences = {
+      user_name: document.getElementById('pref-user-name').value.trim() || 'Sakshi',
+      user_avatar: selectedAvatar,
+      personality_type: document.getElementById('pref-personality').value.trim() || 'Culture Enthusiast & Foodie Explorer',
       dietary_restrictions: dietaryList,
       travel_pace: document.getElementById('pref-pace').value,
       preferred_transport: document.getElementById('pref-transport').value,
       saved_notes: document.getElementById('pref-notes').value,
       budget_level: "Moderate",
       interests: ["Culture", "Foodie"],
-      accessibility_needs: []
+      accessibility_needs: [],
+      past_destinations: (userPreferences && userPreferences.past_destinations) ? userPreferences.past_destinations : []
     };
 
     try {
@@ -150,35 +300,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (res.ok) {
         userPreferences = await res.json();
-        alert('Travel preferences saved successfully!');
+        updateUserProfileUI(userPreferences);
+        alert('Travel Memory Profile saved successfully!');
       }
     } catch (err) {
       console.error('Error saving preferences:', err);
     }
-  });
-
-  // Re-plan Submit
-  btnSubmitReplan.addEventListener('click', async () => {
-    const prompt = replanInput.value.trim();
-    if (!prompt) {
-      alert('Please enter a modification or instruction for re-planning.');
-      return;
-    }
-    await triggerReplan(prompt);
-  });
-
-  replanInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      btnSubmitReplan.click();
-    }
-  });
-
-  document.querySelectorAll('.replan-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const prompt = chip.getAttribute('data-prompt');
-      replanInput.value = prompt;
-      triggerReplan(prompt);
-    });
   });
 
   // API Call: Load User Preferences
@@ -188,14 +315,58 @@ document.addEventListener('DOMContentLoaded', () => {
       if (res.ok) {
         userPreferences = await res.json();
         if (userPreferences) {
-          document.getElementById('pref-dietary').value = (userPreferences.dietary_restrictions || []).join(', ');
-          document.getElementById('pref-pace').value = userPreferences.travel_pace || 'Balanced';
-          document.getElementById('pref-transport').value = userPreferences.preferred_transport || 'Public Transit / Walking';
-          document.getElementById('pref-notes').value = userPreferences.saved_notes || '';
+          updateUserProfileUI(userPreferences);
         }
       }
     } catch (err) {
       console.warn('Preferences load error:', err);
+    }
+  }
+
+  function updateUserProfileUI(prefs) {
+    if (!prefs) return;
+    document.getElementById('header-user-name').textContent = prefs.user_name || 'Sakshi';
+    document.getElementById('pref-user-name').value = prefs.user_name || 'Sakshi';
+    document.getElementById('pref-personality').value = prefs.personality_type || 'Culture Enthusiast & Foodie Explorer';
+    document.getElementById('pref-dietary').value = (prefs.dietary_restrictions || []).join(', ');
+    document.getElementById('pref-pace').value = prefs.travel_pace || 'Balanced';
+    document.getElementById('pref-transport').value = prefs.preferred_transport || 'Public Transit / Walking';
+    document.getElementById('pref-notes').value = prefs.saved_notes || '';
+
+    // Update Avatar UI
+    selectedAvatar = prefs.user_avatar || 'female_1';
+    const avatarUrlMap = {
+      'female_1': 'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(prefs.user_name || 'Sakshi'),
+      'female_2': 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(prefs.user_name || 'Sakshi') + '&gender=female',
+      'male_1': 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&gender=male',
+      'bot_1': 'https://api.dicebear.com/7.x/bottts/svg?seed=RoamAI'
+    };
+
+    const avatarSrc = avatarUrlMap[selectedAvatar] || avatarUrlMap['female_1'];
+    document.getElementById('header-user-avatar').src = avatarSrc;
+
+    document.querySelectorAll('#avatar-picker .avatar-option').forEach(opt => {
+      opt.classList.remove('selected');
+      if (opt.getAttribute('data-avatar') === selectedAvatar) {
+        opt.classList.add('selected');
+      }
+    });
+
+    // Update Past Trip Memory Badges
+    const pastBox = document.getElementById('past-destinations-box');
+    if (pastBox) {
+      pastBox.innerHTML = '';
+      const pastList = prefs.past_destinations || [];
+      if (pastList.length === 0) {
+        pastBox.innerHTML = '<span class="text-muted" style="font-size: 0.85rem;">No past trip history recorded yet.</span>';
+      } else {
+        pastList.forEach(dest => {
+          const badge = document.createElement('span');
+          badge.className = 'memory-badge';
+          badge.innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> ${escapeHtml(dest)}`;
+          pastBox.appendChild(badge);
+        });
+      }
     }
   }
 

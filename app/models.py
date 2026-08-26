@@ -3,6 +3,9 @@ from pydantic import BaseModel, Field
 
 
 class UserPreferences(BaseModel):
+    user_name: str = Field(default="Sakshi", description="Traveler's name")
+    user_avatar: str = Field(default="avatar_1", description="Selected avatar icon/preset")
+    personality_type: str = Field(default="Culture Enthusiast & Foodie Explorer", description="Extracted traveler personality archetype")
     dietary_restrictions: List[str] = Field(default_factory=list, description="e.g. ['Vegetarian', 'Gluten-Free']")
     travel_pace: str = Field(default="Balanced", description="Relaxed, Balanced, or Fast-Paced")
     budget_level: str = Field(default="Moderate", description="Budget, Moderate, Luxury")
@@ -10,6 +13,7 @@ class UserPreferences(BaseModel):
     preferred_transport: str = Field(default="Public Transit / Walking", description="Walking, Public Transit, Taxi, Car Rental")
     accessibility_needs: List[str] = Field(default_factory=list, description="e.g. ['Wheelchair accessible', 'Avoid staircases']")
     saved_notes: Optional[str] = Field(default="", description="General notes or rules for future itineraries")
+    past_destinations: List[str] = Field(default_factory=list, description="History of past planned destinations (e.g. ['NYC', 'Paris'])")
 
 
 class ItineraryRequest(BaseModel):

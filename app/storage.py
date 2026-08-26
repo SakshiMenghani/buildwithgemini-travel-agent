@@ -68,18 +68,22 @@ def get_user_preferences(user_id: str = "default_user") -> UserPreferences:
             
     # Default preferences if none saved
     return UserPreferences(
+        user_name="Sakshi",
+        user_avatar="avatar_1",
+        personality_type="Culture Enthusiast & Foodie Explorer",
         dietary_restrictions=["None"],
         travel_pace="Balanced",
         budget_level="Moderate",
         interests=["Culture", "Foodie", "Sightseeing"],
         preferred_transport="Public Transit / Walking",
         accessibility_needs=[],
-        saved_notes="Prefers authentic local dining and highly rated cultural landmarks."
+        saved_notes="Prefers authentic local dining and highly rated cultural landmarks.",
+        past_destinations=[]
     )
 
 
-def save_trip(itinerary: ItineraryResponse):
-    """Saves a trip itinerary to persistent storage."""
+def save_trip(itinerary: ItineraryResponse, user_id: str = "default_user"):
+    """Saves a trip itinerary to persistent storage and updates user past destinations memory."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(
@@ -88,6 +92,15 @@ def save_trip(itinerary: ItineraryResponse):
     )
     conn.commit()
     conn.close()
+
+    # Update user memory with this new destination
+    try:
+        prefs = get_user_preferences(user_id)
+        if itinerary.destination not in prefs.past_destinations:
+            prefs.past_destinations.append(itinerary.destination)
+            save_user_preferences(prefs, user_id)
+    except Exception as e:
+        print(f"Error updating user trip memory: {e}")
 
 
 def get_trip(trip_id: str) -> Optional[ItineraryResponse]:

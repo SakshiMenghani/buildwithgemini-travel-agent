@@ -84,8 +84,18 @@ RETURN ONLY VALID JSON MATCHING THIS EXACT SCHEMA:
 
 def build_itinerary_prompt(request: ItineraryRequest, prefs: UserPreferences) -> str:
     """Constructs a detailed prompt for Gemini to generate a structured JSON travel itinerary."""
+    past_dest_str = ", ".join(prefs.past_destinations) if prefs.past_destinations else "None yet"
     return f"""
 You are Roam, an expert AI autonomous travel agent. Create a highly personalized, grounded, day-by-day travel itinerary.
+
+TRAVELER PROFILE & LONG-TERM MEMORY:
+- Traveler Name: {prefs.user_name}
+- Traveler Personality / Archetype: {prefs.personality_type}
+- Past Trip Destinations Planned: {past_dest_str}
+- Dietary Restrictions: {', '.join(prefs.dietary_restrictions) if prefs.dietary_restrictions else 'None'}
+- Preferred Transport: {prefs.preferred_transport}
+- Accessibility Needs: {', '.join(prefs.accessibility_needs) if prefs.accessibility_needs else 'None'}
+- Saved Traveler Notes: {prefs.saved_notes or 'Prefers top-rated cultural highlights and authentic dining.'}
 
 TRIP DETAILS:
 - Destination: {request.destination}
@@ -96,18 +106,13 @@ TRIP DETAILS:
 - Travel Style: {request.travel_style}
 - Custom User Request: {request.custom_notes or 'None'}
 
-USER SAVED TRAVEL PREFERENCES:
-- Dietary Restrictions: {', '.join(prefs.dietary_restrictions) if prefs.dietary_restrictions else 'None'}
-- Preferred Transport: {prefs.preferred_transport}
-- Accessibility Needs: {', '.join(prefs.accessibility_needs) if prefs.accessibility_needs else 'None'}
-- Traveler Profile: {prefs.saved_notes or 'Prefers top-rated cultural highlights and authentic dining.'}
-
 INSTRUCTIONS:
-1. Determine the number of days based on start_date and end_date (default to 3 days if dates not clear).
-2. For each day, provide 3 to 4 distinct, real-world activities (Morning, Afternoon, Evening/Night).
-3. Include real place names, realistic timing, estimated costs in USD or local currency, ratings, and practical travel tips.
-4. Include dietary notes for meal recommendations if dietary restrictions are specified.
-5. Provide a summary of the trip highlights and overall budget estimate.
+1. Recognize {prefs.user_name}'s traveler personality ({prefs.personality_type}) and past travel history ({past_dest_str}). Ensure this itinerary for {request.destination} seamlessly builds on their travel profile.
+2. Determine the number of days based on start_date and end_date (default to 3 days if dates not clear).
+3. For each day, provide 3 to 4 distinct, real-world activities (Morning, Afternoon, Evening/Night).
+4. Include real place names, realistic timing, estimated costs in USD or local currency, ratings, and practical travel tips.
+5. Include dietary notes for meal recommendations if dietary restrictions are specified.
+6. Provide a summary of the trip highlights and overall budget estimate.
 
 REQUIRED JSON OUTPUT FORMAT ONLY:
 {{
@@ -381,7 +386,7 @@ agent = root_agent
 
 adk_app = App(
     root_agent=root_agent,
-    name="roam_app",
+    name="app",
 )
 
 app = adk_app
